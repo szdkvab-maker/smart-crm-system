@@ -1,0 +1,1 @@
+{% extends 'base.html' %}{% block content %}<section class="panel narrow"><h1>{{ title }} · запись</h1><form method="post">{% csrf_token %}{{ form.as_p }}<button>Сохранить</button> <a href="{% url kind|add:'_list' %}">Отмена</a></form></section>{% endblock %}
