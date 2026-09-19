@@ -1,3 +1,54 @@
 {% load static %}
-<!doctype html><html lang="ru"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>SmartCRM</title><link rel="stylesheet" href="{% static 'css/app.css' %}"></head>
-<body><header><a class="brand" href="{% url 'dashboard' %}">SmartCRM<span>Рабочее пространство</span></a>{% if user.is_authenticated %}<nav><a href="{% url 'dashboard' %}">Обзор</a><a href="{% url 'clients_list' %}">Клиенты</a><a href="{% url 'deals_list' %}">Сделки</a><a href="{% url 'tasks_list' %}">Задачи</a></nav><form action="{% url 'logout' %}" method="post">{% csrf_token %}<button class="secondary">Выйти · {{ user.username }}</button></form>{% endif %}</header><main>{% for message in messages %}<p role="status" class="notice">{{ message }}</p>{% endfor %}{% block content %}{% endblock %}</main><footer>SmartCRM · Учебный проект</footer></body></html>
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>{% block title %}{{ title|default:"Обзор" }} · SmartCRM{% endblock %}</title>
+  <link rel="stylesheet" href="{% static 'css/ui.css' %}">
+  <script src="{% static 'js/theme.js' %}"></script>
+  <script defer src="{% static 'js/ui.js' %}"></script>
+</head>
+<body class="{% if not user.is_authenticated %}guest{% endif %}">
+{% include 'crm/icons.html' %}
+<a class="skip" href="#main">Перейти к содержимому</a>
+{% if user.is_authenticated %}
+<aside class="sidebar" id="sidebar">
+  <a class="brand" href="{% url 'dashboard' %}"><span class="brand-mark">S</span><span>Smart<span class="brand-accent">CRM</span><small>ЛЮДИ. СВЯЗИ. ВОЗМОЖНОСТИ.</small></span></a>
+  <div class="workspace"><span class="workspace-icon">{{ user.username|slice:":1"|upper }}</span><div>Моё пространство<small>Личная CRM</small></div><span class="online-dot"></span></div>
+  <p class="nav-caption">РАБОЧЕЕ ПРОСТРАНСТВО</p>
+  <nav aria-label="Главная навигация">
+    <a href="{% url 'dashboard' %}" {% if request.resolver_match.url_name == 'dashboard' %}aria-current="page"{% endif %}>{% include 'crm/icon.html' with name='grid' %}Обзор</a>
+    <a href="{% url 'clients_list' %}" {% if kind == 'clients' %}aria-current="page"{% endif %}>{% include 'crm/icon.html' with name='users' %}Клиенты</a>
+    <a href="{% url 'deals_list' %}" {% if kind == 'deals' %}aria-current="page"{% endif %}>{% include 'crm/icon.html' with name='briefcase' %}Сделки</a>
+    <a href="{% url 'tasks_list' %}" {% if kind == 'tasks' %}aria-current="page"{% endif %}>{% include 'crm/icon.html' with name='check' %}Задачи</a>
+  </nav>
+  <div class="sidebar-bottom"><div class="side-note"><span class="online-dot"></span>Всё важное — рядом<p>От первого знакомства<br>до успешной сделки.</p></div><button class="theme-toggle ghost" type="button">{% include 'crm/icon.html' with name='moon' %}<span>Сменить тему</span></button></div>
+</aside>
+<button class="sidebar-backdrop" type="button" aria-label="Закрыть меню" hidden></button>
+{% endif %}
+<div class="app-shell">
+<header class="topbar">
+  <div class="topbar-inner">
+    {% if user.is_authenticated %}
+    <button id="menu-toggle" class="icon-button mobile-only" aria-label="Открыть меню" aria-expanded="false" aria-controls="sidebar">{% include 'crm/icon.html' with name='menu' %}</button>
+    <span class="breadcrumb">Рабочее пространство <span>/</span> <b>{{ title|default:"Обзор" }}</b></span>
+    <div class="top-actions">
+      <details class="dropdown"><summary class="button small">+ Создать</summary><div class="dropdown-content"><a href="{% url 'clients_create' %}">Клиента</a><a href="{% url 'deals_create' %}">Сделку</a><a href="{% url 'tasks_create' %}">Задачу</a></div></details>
+      <details class="dropdown profile"><summary aria-label="Меню профиля"><span class="mini-avatar">{{ user.username|slice:":1"|upper }}</span><span class="profile-name">{{ user.username }}</span></summary><div class="dropdown-content"><strong>{{ user.username }}</strong><small>Ваш аккаунт</small><form action="{% url 'logout' %}" method="post">{% csrf_token %}<button class="ghost">Выйти из аккаунта</button></form></div></details>
+    </div>
+    {% else %}<a class="brand" href="{% url 'login' %}">SmartCRM</a>{% endif %}
+  </div>
+</header>
+<main id="main" class="container" tabindex="-1">
+  <div class="toast-stack" aria-live="polite">{% for message in messages %}<div class="notice"><span>{{ message }}</span><button type="button" class="dismiss icon-button" aria-label="Закрыть уведомление">×</button></div>{% endfor %}</div>
+  {% block content %}{% endblock %}
+</main>
+<footer class="container"><span>SmartCRM <b>·</b> Ваши отношения с клиентами</span><span>Создано для малого бизнеса</span></footer>
+</div>
+<dialog id="client-drawer" class="drawer" aria-label="Карточка клиента">
+  <div class="drawer-top"><span class="eyebrow">ПРОФИЛЬ КЛИЕНТА</span><button class="icon-button drawer-close" aria-label="Закрыть карточку">×</button></div>
+  <div id="drawer-content" aria-live="polite"></div>
+</dialog>
+</body></html>
+

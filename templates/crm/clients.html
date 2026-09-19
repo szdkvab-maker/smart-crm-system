@@ -1,0 +1,25 @@
+{% extends 'base.html' %}{% load crm_ui %}
+{% block content %}
+<div class="page-heading"><div><p class="eyebrow">КАЖДЫЙ КЛИЕНТ — НОВАЯ ВОЗМОЖНОСТЬ</p><h1>Ваши клиенты<span class="accent">.</span> <span class="count-pill">{{ page_obj.paginator.count }}</span></h1><p class="muted">Люди и компании, с которыми растёт ваш бизнес.</p></div><a class="button" href="{% url 'clients_create' %}">+ Добавить клиента</a></div>
+<form class="filterbar panel" method="get">
+  <div class="search-input">{% include 'crm/icon.html' with name='search' %}<input name="q" value="{{ q }}" placeholder="Имя, компания, телефон или email" aria-label="Поиск клиентов"></div>
+  <select name="type" aria-label="Тип клиента"><option value="">Все клиенты</option><option value="person" {% if client_type == 'person' %}selected{% endif %}>Люди</option><option value="company" {% if client_type == 'company' %}selected{% endif %}>Компании</option></select>
+  <select name="sort" aria-label="Сортировка"><option value="recent" {% if sort == 'recent' %}selected{% endif %}>Сначала новые</option><option value="oldest" {% if sort == 'oldest' %}selected{% endif %}>Сначала старые</option><option value="name" {% if sort == 'name' %}selected{% endif %}>По имени</option></select>
+  <input type="hidden" name="mode" value="{{ mode }}"><button class="secondary">Найти</button><a class="reset-filter" href="{% url 'clients_list' %}">Сбросить</a>
+</form>
+<div class="list-toolbar"><span class="muted">Наведите для деталей · Нажмите, чтобы открыть</span><div class="view-switch"><a href="?{{ query_string }}&mode=cards" {% if mode == 'cards' %}aria-current="true"{% endif %}>Карточки</a><a href="?{{ query_string }}&mode=table" {% if mode == 'table' %}aria-current="true"{% endif %}>Таблица</a></div></div>
+{% if mode == 'table' %}<div class="panel table-wrap"><table><thead><tr><th>Клиент</th><th>Тип</th><th>Телефон</th><th>Email</th><th>Сделки</th></tr></thead><tbody>{% for obj in objects %}<tr><td><a class="person-link" href="{% url 'clients_detail' obj.pk %}" data-client-panel>{% include 'crm/avatar.html' with customer=obj %}<b>{{ obj.name }}</b></a></td><td>{{ obj.get_kind_display }}</td><td>{{ obj.phone|default:"—" }}</td><td>{{ obj.email|default:"—" }}</td><td>{{ obj.deal_total|money }}</td></tr>{% empty %}<tr><td colspan="5" class="empty">Ничего не найдено. Измените фильтры или добавьте клиента.</td></tr>{% endfor %}</tbody></table></div>
+{% else %}
+<div class="client-grid">
+{% for obj in objects %}
+<article class="client-card {% if obj.kind == 'company' %}company-card{% endif %}">
+  <div class="client-card-top"><span class="badge">{% if obj.kind == 'company' %}{% include 'crm/icon.html' with name='building' %}{% else %}{% include 'crm/icon.html' with name='users' %}{% endif %}{{ obj.get_kind_display }}</span><a class="card-arrow" data-client-panel href="{% url 'clients_detail' obj.pk %}" aria-label="Открыть {{ obj.name }}">{% include 'crm/icon.html' with name='arrow' %}</a></div>
+  <a class="card-main" data-client-panel href="{% url 'clients_detail' obj.pk %}">{% include 'crm/avatar.html' with customer=obj %}<h2>{{ obj.name }}</h2><p>{% if obj.kind == 'company' %}{{ obj.industry|default:"Сфера не указана" }}{% else %}{{ obj.position|default:obj.company|default:"Личный контакт" }}{% endif %}</p></a>
+  <div class="card-contacts"><span>{% include 'crm/icon.html' with name='phone' %}{{ obj.phone|default:"Телефон не указан" }}</span><span>{% include 'crm/icon.html' with name='mail' %}{{ obj.email|default:"Email не указан" }}</span></div>
+  <div class="card-footer"><span>Сделок: <b>{{ obj.visible_deals|length }}</b></span><strong>{{ obj.deal_total|money }}</strong></div>
+  <div class="hover-preview"><span class="eyebrow">БЫСТРЫЙ ПРОСМОТР</span><p>{% if obj.kind == 'company' %}Контакт: {{ obj.contact_person|default:"не указан" }}{% else %}Компания: {{ obj.company|default:"не указана" }}{% endif %}</p>{% with next=obj.visible_tasks|first %}<p><b>Следующий шаг</b><br>{% if next %}{{ next.title }} · {{ next.due_date|date:"d.m.Y"|default:"Без срока" }}{% else %}Открытых задач нет{% endif %}</p>{% endwith %}<a data-client-panel class="button small" href="{% url 'clients_detail' obj.pk %}">Открыть карточку ↗</a></div>
+</article>
+{% empty %}<section class="panel empty full-width">{% include 'crm/icon.html' with name='users' %}<h2>{% if q or client_type %}Клиенты не найдены{% else %}Здесь появятся ваши клиенты{% endif %}</h2><p>Добавьте человека или компанию: фото, контакты и все дела будут рядом.</p><a class="button" href="{% url 'clients_create' %}">+ Добавить клиента</a></section>{% endfor %}
+</div>{% endif %}
+{% if page_obj.paginator.num_pages > 1 %}<nav class="pagination" aria-label="Страницы клиентов">{% if page_obj.has_previous %}<a class="secondary button" href="?{{ query_string }}&page={{ page_obj.previous_page_number }}">← Назад</a>{% endif %}<span>Страница {{ page_obj.number }} из {{ page_obj.paginator.num_pages }}</span>{% if page_obj.has_next %}<a class="secondary button" href="?{{ query_string }}&page={{ page_obj.next_page_number }}">Далее →</a>{% endif %}</nav>{% endif %}
+{% endblock %}

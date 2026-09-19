@@ -1,8 +1,24 @@
 from django.contrib.auth.models import User
 from django.db import models
+from uuid import uuid4
+
+
+def client_photo_path(instance, filename):
+    return f"clients/{uuid4().hex}.jpg"
 
 
 class Client(models.Model):
+    class Kind(models.TextChoices):
+        PERSON = "person", "Человек"
+        COMPANY = "company", "Компания"
+
+    kind = models.CharField("Тип клиента", max_length=10, choices=Kind.choices, default=Kind.PERSON)
+    photo = models.ImageField("Фото или логотип", upload_to=client_photo_path, blank=True)
+    position = models.CharField("Должность", max_length=120, blank=True)
+    industry = models.CharField("Сфера деятельности", max_length=120, blank=True)
+    contact_person = models.CharField("Контактное лицо", max_length=150, blank=True)
+    website = models.URLField("Сайт", blank=True)
+    city = models.CharField("Город", max_length=120, blank=True)
     owner = models.ForeignKey(User, on_delete=models.CASCADE, related_name="clients")
     name = models.CharField("Имя или компания", max_length=150)
     email = models.EmailField("Email", blank=True)
@@ -19,6 +35,10 @@ class Client(models.Model):
 
     def __str__(self):
         return self.name
+
+    @property
+    def initials(self):
+        return "".join(word[0] for word in self.name.split()[:2]).upper() or "?"
 
 
 class Deal(models.Model):
