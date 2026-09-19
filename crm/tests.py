@@ -23,10 +23,10 @@ class CRMTests(TestCase):
                 self.assertEqual(self.client.get(path).status_code, 200)
 
     def test_client_crud(self):
-        self.assertEqual(self.client.post('/clients/new/', {'name': 'New'}).status_code, 302)
+        self.assertEqual(self.client.post('/clients/new/', {'name': 'New', 'kind': 'person'}).status_code, 302)
         obj = Client.objects.get(name='New')
         self.assertEqual(obj.owner, self.user)
-        self.client.post(f'/clients/{obj.pk}/edit/', {'name': 'Updated'})
+        self.client.post(f'/clients/{obj.pk}/edit/', {'name': 'Updated', 'kind': 'person'})
         obj.refresh_from_db()
         self.assertEqual(obj.name, 'Updated')
         self.client.get(f'/clients/{obj.pk}/delete/')
