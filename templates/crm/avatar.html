@@ -1,0 +1,1 @@
+<span class="avatar {% if customer.kind == 'company' %}company-avatar{% endif %}">{% if customer.photo %}<img src="{% url 'clients_photo' customer.pk %}" alt="{% if customer.kind == 'company' %}Логотип{% else %}Фото{% endif %} {{ customer.name }}" loading="lazy">{% else %}{{ customer.initials }}{% endif %}</span>

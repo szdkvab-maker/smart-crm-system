@@ -1,0 +1,19 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="page-heading">
+  <div><p class="eyebrow">КАБИНЕТ КЛИЕНТА</p><h1>Мои заявки<span class="accent">.</span></h1><p class="muted">Статус решений администратора.</p></div>
+  <div class="top-actions">
+    <a class="button" href="{% url 'portal_request_create' 'deal' %}">Запросить сделку</a>
+    <a class="button secondary" href="{% url 'portal_request_create' 'task' %}">Запросить задачу</a>
+  </div>
+</div>
+<section class="panel">
+  <div class="section-heading"><h2>История заявок</h2><span class="count-pill">{{ requests|length }}</span></div>
+  {% for item in requests %}
+  <article class="activity-row">
+    <span><b>{{ item.title }}</b><small>{{ item.get_kind_display }} · {{ item.created_at|date:'d.m.Y H:i' }}</small>{% if item.description %}<small>{{ item.description }}</small>{% endif %}</span>
+    <strong>{{ item.get_status_display }}</strong>
+  </article>
+  {% empty %}<p class="muted">Заявок пока нет.</p>{% endfor %}
+</section>
+{% endblock %}

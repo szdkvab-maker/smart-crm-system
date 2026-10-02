@@ -1,0 +1,14 @@
+{% extends 'base.html' %}
+{% block content %}
+<section class="panel narrow">
+  <p class="eyebrow">КАБИНЕТ КЛИЕНТА</p>
+  <h1>Заявка на регистрацию</h1>
+  <p class="muted">После проверки администратор откроет доступ к кабинету.</p>
+  <form method="post" class="record-form">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit">Отправить заявку</button>
+  </form>
+  <p class="muted"><a href="{% url 'login' %}">Вернуться ко входу</a></p>
+</section>
+{% endblock %}

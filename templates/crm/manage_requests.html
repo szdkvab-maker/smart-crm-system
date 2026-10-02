@@ -1,0 +1,24 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="page-heading"><div><p class="eyebrow">УПРАВЛЕНИЕ ДОСТУПОМ И ЗАПРОСАМИ</p><h1>Заявки клиентов<span class="accent">.</span></h1><p class="muted">Одобрение регистрации создает карточку клиента; одобрение заявки добавляет сделку или задачу в CRM.</p></div></div>
+<section class="panel">
+  <div class="section-heading"><h2>Регистрация</h2><span class="count-pill">{{ registrations|length }}</span></div>
+  {% for item in registrations %}
+  <article class="activity-row">
+    <span><b>{{ item.full_name }}</b><small>{{ item.user.username }} · {{ item.user.email }}</small><small>{{ item.company|default:'Компания не указана' }}{% if item.phone %} · {{ item.phone }}{% endif %}</small></span>
+    <span>{{ item.get_status_display }}</span>
+    {% if item.status == 'pending' %}<span class="top-actions"><form method="post" action="{% url 'review_registration' item.pk 'approve' %}">{% csrf_token %}<button type="submit">Одобрить</button></form><form method="post" action="{% url 'review_registration' item.pk 'reject' %}">{% csrf_token %}<button class="secondary" type="submit">Отклонить</button></form></span>{% endif %}
+  </article>
+  {% empty %}<p class="muted">Заявок на регистрацию пока нет.</p>{% endfor %}
+</section>
+<section class="panel">
+  <div class="section-heading"><h2>Заявки на сделки и задачи</h2><span class="count-pill">{{ requests|length }}</span></div>
+  {% for item in requests %}
+  <article class="activity-row">
+    <span><b>{{ item.title }}</b><small>{{ item.get_kind_display }} · {{ item.requester.username }}{% if item.requester.portal_profile.client %} · {{ item.requester.portal_profile.client.name }}{% endif %}</small>{% if item.description %}<small>{{ item.description }}</small>{% endif %}{% if item.amount %}<small>Сумма: {{ item.amount }}</small>{% endif %}{% if item.due_date %}<small>Желаемый срок: {{ item.due_date|date:'d.m.Y' }}</small>{% endif %}</span>
+    <span>{{ item.get_status_display }}</span>
+    {% if item.status == 'pending' %}<span class="top-actions"><form method="post" action="{% url 'review_portal_request' item.pk 'approve' %}">{% csrf_token %}<button type="submit">Одобрить</button></form><form method="post" action="{% url 'review_portal_request' item.pk 'reject' %}">{% csrf_token %}<button class="secondary" type="submit">Отклонить</button></form></span>{% endif %}
+  </article>
+  {% empty %}<p class="muted">Заявок пока нет.</p>{% endfor %}
+</section>
+{% endblock %}
